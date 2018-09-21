@@ -3,6 +3,7 @@ package com.abl.web;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import com.abl.rtc.api.client.ApprovalStatusAction;
 import com.abl.rtc.api.mgr.RTCMGR;
 import com.abl.rtc.api.mgr.WorkitemMGR;
 import com.ibm.team.repository.common.TeamRepositoryException;
+import com.ibm.team.workitem.client.IWorkItemClient;
 
 /**
  * @author dhshin
@@ -42,13 +44,35 @@ public class WorkItemStateController {
 			//RTC Client start
 			rtcMGR.startup();
 			
+			IWorkItemClient workitemClient = rtcMGR.getWorkitemClient();
+			IProgressMonitor monitor = (IProgressMonitor)rtcMGR.getMonitor();
+			
+			statusAction.setWorkitemClient(workitemClient);
+			statusAction.setMonitor(monitor);
+			
 		} catch (TeamRepositoryException e) {
-			// TODO 자동 생성된 catch 블록
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@RequestMapping(value = "update/{wiid}", method = RequestMethod.GET)
+	public String update( Model model, HttpSession session, String userId, String password, @PathVariable int wiid, String actionId, String oldStateId) {
+		System.out.println("update");
+		login(userId, password);
+		System.out.println("wiid = " + wiid + " actionId = " + actionId + " oldStateId = " + oldStateId);
+		
+		try {
+			boolean result = statusAction.findWorkItem(wiid, actionId, oldStateId);
+			model.addAttribute("result", result);
+			model.addAttribute("userId", userId);
+			model.addAttribute("password", password);
+		} catch (TeamRepositoryException e) {
 			e.printStackTrace();
 		} finally {
 			rtcMGR.shutdown();
-			
 		}
+		return "update";
 	}
 	
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
@@ -58,52 +82,5 @@ public class WorkItemStateController {
 		return "test";
 	}
 	
-	@RequestMapping(value = "update/{wiid}", method = RequestMethod.GET)
-	public String update( Model model, HttpSession session, @PathVariable int wiid,String userId, String password, String actionId, String oldStateId) {
-		System.out.println("update");
-		login(userId, password);
-		
-		actionId = null;
-		oldStateId = null;
-		try {
-			int result = statusAction.findWorkItem(wiid, actionId, oldStateId);
-			model.addAttribute("result", result);
-		} catch (TeamRepositoryException e) {
-			// TODO 자동 생성된 catch 블록
-			e.printStackTrace();
-		}
-		/*try {
-			
-			//rtcMGR = RTCMGR.getInstance();
-			rtcMGR.setREPOSITORY_ADDRESS("https://sdh.net:9443/ccm");
-			// userid
-			rtcMGR.setUSER(userId);
-			// password
-			rtcMGR.setPASSWORD(password);
-			//RTC Client start
-			rtcMGR.startup();
-			IWorkItemClient workitemClient = rtcMGR.getWorkitemClient();
-			IProgressMonitor monitor = (IProgressMonitor)rtcMGR.getMonitor();
-			WorkItemWorkingCopy workingCopy;
-			IWorkItem workItem;
-			
-			workItem = workitemMGR.findWorkitemById(workitemClient, monitor, wiid);
-			workingCopy = workitemMGR.getWorkingCopy(workitemClient, monitor, workItem);
-			String wiStateId = workItem.getState2().getStringIdentifier();
-			System.out.println(wiStateId);
-			model.addAttribute("workitemClient",workitemClient );
-			model.addAttribute("monitor", monitor );
-			model.addAttribute("wiid", wiid);
-			model.addAttribute("userId", userId);
-			model.addAttribute("password", password);
-			model.addAttribute("monitor", monitor);
-			rtcMGR.shutdown();
-		} catch (TeamRepositoryException e) {
-			// TODO 자동 생성된 catch 블록
-			e.printStackTrace();
-		}*/
-		
-		return "update";
-	}
 
 }

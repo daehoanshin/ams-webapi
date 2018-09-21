@@ -7,10 +7,10 @@
 <title>Insert title here</title>
 </head>
 <body>
-wiid : ${wiid}
-userId :  ${userId}
-password : ${password}
-workitemClient : ${workitemClient}
-monitor :  ${monitor}
+wiid : ${wiid} <br>
+userId :  ${userId} <br>
+password : ${password} <br>
+result : ${result} <br>
+
 </body>
 </html>

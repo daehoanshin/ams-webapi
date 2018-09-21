@@ -1,28 +1,50 @@
 package com.abl.rtc.api.client;
 
+import javax.annotation.Resource;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.stereotype.Service;
 
-import com.abl.rtc.api.common.CommonApiMgr;
+import com.abl.rtc.api.mgr.WorkflowMGR;
+import com.abl.rtc.api.mgr.WorkitemMGR;
 import com.ibm.team.repository.common.TeamRepositoryException;
+import com.ibm.team.workitem.client.IWorkItemClient;
+import com.ibm.team.workitem.client.WorkItemWorkingCopy;
+import com.ibm.team.workitem.common.model.IWorkItem;
 
 @Service
-public class ApprovalStatusAction extends CommonApiMgr {
+public class ApprovalStatusAction {
+	@Resource
+	WorkitemMGR workitemMGR;
+	@Resource
+	WorkflowMGR workflowMGR;
 	
+	private IWorkItemClient workitemClient;
+	private IProgressMonitor monitor;
 	
-	public int  findWorkItem(int wiid, String actionId, String oldStateId) throws TeamRepositoryException {
-		workItem = workitemMGR.findWorkitemById(workitemClient, monitor, wiid);
-		workingCopy = workitemMGR.getWorkingCopy(workitemClient, monitor, workItem);
-		
-		return stateUpdate(actionId, oldStateId);
+	public void setMonitor(IProgressMonitor monitor) {
+		this.monitor = monitor;
+	}
+
+	public void setWorkitemClient(IWorkItemClient workitemClient) {
+		this.workitemClient = workitemClient;
+	}
+
+	public boolean findWorkItem(int wiid, String actionId, String oldStateId) throws TeamRepositoryException {
+		IWorkItem workItem = workitemMGR.findWorkitemById(workitemClient, monitor, wiid);
+		return stateUpdate(workItem, actionId, oldStateId);
 	}
 	
-	private int stateUpdate(String actionId, String oldStateId) throws TeamRepositoryException {
+	private boolean stateUpdate(IWorkItem workItem, String actionId, String oldStateId) throws TeamRepositoryException {
+		boolean isOldState = false;
 		if(actionId != null && oldStateId != null) {
+			WorkItemWorkingCopy workingCopy = workitemMGR.getWorkingCopy(workitemClient, monitor, workItem);
+			
 			String actionName = workflowMGR.findActionNameById(workitemClient, monitor, workItem, actionId);
 			String wiStateId = workItem.getState2().getStringIdentifier();
 			String wiStateName = workflowMGR.findStateNameById(workitemClient, monitor, workItem, wiStateId);
 			String oldStateName = null;
-			boolean isOldState = false;
+			
 			if(wiStateId.equals(oldStateId)) {
 				isOldState = true;
 				oldStateName = workflowMGR.findStateNameById(workitemClient, monitor, workItem, oldStateId);
@@ -35,8 +57,9 @@ public class ApprovalStatusAction extends CommonApiMgr {
 				System.out.println("작업항목의 액션(" + actionName + ")을 실행하려했으나 상태가 '" + oldStateName + "'이(가) 아닙니다.");
 			}
 			//작업항목 저장
-			return workitemMGR.saveWorkitem(workitemClient, monitor, workingCopy);
+			workitemMGR.saveWorkitem(workitemClient, monitor, workingCopy);
+			return isOldState;
 		}
-		return 1;
+		return isOldState;
 	}
 }
