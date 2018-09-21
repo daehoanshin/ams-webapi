@@ -16,8 +16,9 @@ public class WorkItemStateController {
 
 	
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public String test(Model model, String userId, String password, HttpSession session) {
-		System.out.println("ddd");
+	public String main(Model model, String userId, String password, HttpSession session) {
+		model.addAttribute("userId", userId);
+		model.addAttribute("password", password);
 		return "test";
 	}
 }

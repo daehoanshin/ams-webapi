@@ -7,7 +7,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-userId :  ${userId}
-password : ${password }
+${userId}
 </body>
 </html>
