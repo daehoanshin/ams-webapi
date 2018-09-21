@@ -15,19 +15,6 @@ import com.ibm.team.workitem.common.workflow.IWorkflowInfo;
 @Component
 public class WorkflowMGR {
 
-	private  WorkflowMGR instance;
-
-	private WorkflowMGR() {
-
-	}
-
-	public  WorkflowMGR getInstance() {
-		if (instance == null) {
-			instance = new WorkflowMGR();
-		}
-		return instance;
-	}
-
 	/**
 	 * 작업항목워킹카피에 실행 대상 액션의 ID를 설정한다.
 	 * 

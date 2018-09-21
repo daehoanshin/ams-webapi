@@ -23,7 +23,6 @@ import com.ibm.team.workitem.common.model.IWorkItemType;
 @Component
 public class RTCMGR {
 
-	//private RTCMGR instance;
 	// RTC Repository Address
 	private String REPOSITORY_ADDRESS;
 	// RTC user
@@ -55,14 +54,6 @@ public class RTCMGR {
 	public void setPASSWORD(String pASSWORD) {
 		PASSWORD = pASSWORD;
 	}
-
-
-	/*public RTCMGR getInstance() {
-		if (instance == null) {
-			instance = new RTCMGR();
-		}
-		return instance;
-	}*/
 
 	public IProgressMonitor getMonitor() {
 		return monitor;

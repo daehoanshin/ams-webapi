@@ -15,5 +15,4 @@ public class CommonApiMgr {
 	protected IProgressMonitor monitor;
 	protected WorkItemWorkingCopy workingCopy;
 	protected IWorkItem workItem;
-	
 }

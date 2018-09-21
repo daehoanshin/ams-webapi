@@ -24,12 +24,6 @@ import com.ibm.team.workitem.common.model.WorkItemEndPoints;
 @Component
 public class WorkitemMGR {
 	
-	
-	/*public  WorkitemMGR getInstance(){
-		if(instance == null) instance = new WorkitemMGR();
-		return instance;
-	}
-	*/
 	/**
 	 * 작업항목 저장
 	 * 
