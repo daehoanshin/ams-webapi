@@ -10,7 +10,7 @@
 wiid : ${wiid}
 userId :  ${userId}
 password : ${password}
-
-
+workitemClient : ${workitemClient}
+monitor :  ${monitor}
 </body>
 </html>

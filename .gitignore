@@ -8,3 +8,5 @@ webapp/META-INF/
 \.classpath
 
 \.project
+
+webapp/WEB-INF/lib/
