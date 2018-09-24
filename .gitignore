@@ -5,7 +5,4 @@ target/classes/
 
 webapp/META-INF/
 
-
-\.project
-
 webapp/WEB-INF/lib/
