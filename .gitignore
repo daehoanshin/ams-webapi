@@ -1,8 +1,8 @@
 
-\.settings/
-
 target/classes/
 
 webapp/META-INF/
 
 webapp/WEB-INF/lib/
+
+\.settings/

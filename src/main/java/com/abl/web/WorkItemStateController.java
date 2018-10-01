@@ -2,22 +2,26 @@ package com.abl.web;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.abl.domain.Authenticate;
 import com.abl.rtc.api.client.ApprovalStatusAction;
 import com.abl.rtc.api.common.IAttributeIDs;
 import com.abl.rtc.api.mgr.RTCMGR;
 import com.abl.rtc.api.mgr.WorkitemMGR;
 import com.ibm.team.repository.common.TeamRepositoryException;
 import com.ibm.team.workitem.client.IWorkItemClient;
+
 
 /**
  * @author dhshin
@@ -34,54 +38,96 @@ public class WorkItemStateController {
 	@Resource
 	private ApprovalStatusAction statusAction;
 
-	@RequestMapping(value = "update/{wiid}", method = RequestMethod.GET)
-	public String update(Model model, HttpSession session, String userId, String password, @PathVariable int wiid, String actionId, String oldStateId) {
-		System.out.println("update");
-		login(userId, password);
-		logger.info("wiid = " + wiid + " actionId = " + actionId + " oldStateId = " + oldStateId);
-
+	@RequestMapping(value = "approval/{wiid}", method = RequestMethod.POST)
+	public String approval(Model model, HttpSession session, @PathVariable int wiid) throws TeamRepositoryException {
+		logger.info("approval");
+		//Authenticate authenticate = (Authenticate) session.getAttribute("authenticate");
 		try {
-			boolean result = statusAction.findWorkItem(wiid, actionId, oldStateId);
+			String actionId = (String) session.getAttribute("actionId");
+			String oldStateId = (String) session.getAttribute("oldStateId");
+			String userId = (String) session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+			
+			
+			logger.info("wiid = " + wiid + " actionId = " + actionId + " oldStateId = " + oldStateId);
+			/*if (!password.equals(HttpSessionUtils.getUserFormSession(session))) {
+				return "/login/form";
+			}*/
+			//boolean result = statusAction.findWorkItem(wiid, actionId , oldStateId);
+			boolean result = true;
 			model.addAttribute("result", result);
+			model.addAttribute("wiid", wiid);
 			model.addAttribute("userId", userId);
-			model.addAttribute("password", password);
-		} catch (TeamRepositoryException e) {
-			e.printStackTrace();
+			
+			session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY);
+			session.removeAttribute("actionId");
+			session.removeAttribute("oldStateId");
 		} finally {
 			rtcMGR.shutdown();
 		}
-		return "update";
+		return "users/approval";
 	}
 
-	public void login(String userId, String password) {
+	@RequestMapping("/login/form")
+	public String loginForm(Model model, String userId, int wiid, String actionId, String oldStateId) {
+		Authenticate authenticate = new Authenticate();
+		authenticate.setUserId(userId);
+		authenticate.setWiid(wiid);
+		authenticate.setActionId(actionId);
+		authenticate.setOldStateId(oldStateId);
+		model.addAttribute("authenticate", authenticate);
+		return "users/login";
+	}
 
-		try {
-			rtcMGR = new RTCMGR();
+	@RequestMapping("/login")
+	public String login(@Valid Authenticate authenticate, BindingResult bindingResult, HttpSession session,
+			Model model) {
 
-			rtcMGR.setREPOSITORY_ADDRESS(IAttributeIDs.REPOSITORY_ADDRESS);
-			// userid
-			rtcMGR.setUSER(userId);
-			// password
-			rtcMGR.setPASSWORD(password);
-			// RTC Client start
-			rtcMGR.startup();
-
-			IWorkItemClient workitemClient = rtcMGR.getWorkitemClient();
-			IProgressMonitor monitor = (IProgressMonitor) rtcMGR.getMonitor();
-
-			statusAction.setWorkitemClient(workitemClient);
-			statusAction.setMonitor(monitor);
-
+		if (bindingResult.hasErrors()) {
+			return "users/login";
+		}
+		
+		//TODO 로그인처리 
+		/*try {
+			if (!rtcApiLogin(authenticate.getWiid(), authenticate.getUserId(), authenticate.getPassword())) {
+				model.addAttribute("errorMessage", "비밀번호가 틀립니다.");
+				return "users/login";
+			}
 		} catch (TeamRepositoryException e) {
 			e.printStackTrace();
+		}*/
+		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, authenticate.getUserId());
+		session.setAttribute("actionId", authenticate.getActionId());
+		session.setAttribute("oldStateId", authenticate.getOldStateId());
+
+		return "users/approval";
+	}
+
+	public boolean rtcApiLogin(int wiid, String userId, String password) throws TeamRepositoryException {
+
+		rtcMGR.setREPOSITORY_ADDRESS(IAttributeIDs.REPOSITORY_ADDRESS);
+		// userid
+		rtcMGR.setUSER(userId);
+		// password
+		rtcMGR.setPASSWORD(password);
+		// RTC Client start
+		// rtcMGR.startup();
+
+		IWorkItemClient workitemClient = rtcMGR.getWorkitemClient();
+		IProgressMonitor monitor = (IProgressMonitor) rtcMGR.getMonitor();
+		logger.info("workitemClient : {} " + workitemClient);
+		if (workitemClient == null)
+			return false;
+
+		if (workitemClient != null && monitor != null) {
+			statusAction.setWorkitemClient(workitemClient);
+			statusAction.setMonitor(monitor);
 		}
+		return true;
 	}
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public String main(Model model, String userId, String password, HttpSession session) {
-		model.addAttribute("userId", userId);
-		model.addAttribute("password", password);
-		return "test";
+	@RequestMapping("/logout")
+	public String loginForm(HttpSession session) {
+		session.removeAttribute("userId");
+		return "redirect:/";
 	}
-
 }

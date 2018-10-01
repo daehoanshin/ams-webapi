@@ -9,8 +9,10 @@
 		</encoder>
 	</appender>
 	
-	<property name="LOG_DIR" value="D:\\IBM\\Interface\\logs" />
-	<property name="LOG_PATH_NAME" value="${LOG_DIR}\\approval" />
+	<!-- <property name="LOG_DIR" value="D:\\IBM\\Interface\\logs" /> -->
+	<!-- <property name="LOG_PATH_NAME" value="${LOG_DIR}\\approval" /> -->
+	<property name="LOG_DIR" value="/home/xbb123/IBM/Interface/logs" />
+	<property name="LOG_PATH_NAME" value="${LOG_DIR}/approval" />
 	
 	<appender name="approvalStateUpdate" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<!-- <file>D:\IBM\Interface\logs\approval.log</file> -->
