@@ -85,16 +85,11 @@ public class WorkItemStateController {
 		if (bindingResult.hasErrors()) {
 			return "users/login";
 		}
-		
-		//TODO 로그인처리 
-		/*try {
-			if (!rtcApiLogin(authenticate.getWiid(), authenticate.getUserId(), authenticate.getPassword())) {
-				model.addAttribute("errorMessage", "비밀번호가 틀립니다.");
-				return "users/login";
-			}
-		} catch (TeamRepositoryException e) {
-			e.printStackTrace();
-		}*/
+		//rtc 로그인처리
+		if (!rtcApiLogin(authenticate.getWiid(), authenticate.getUserId(), authenticate.getPassword())) {
+			model.addAttribute("errorMessage", "비밀번호가 틀립니다.");
+			return "users/login";
+		}
 		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, authenticate.getUserId());
 		session.setAttribute("actionId", authenticate.getActionId());
 		session.setAttribute("oldStateId", authenticate.getOldStateId());
@@ -102,21 +97,29 @@ public class WorkItemStateController {
 		return "users/approval";
 	}
 
-	public boolean rtcApiLogin(int wiid, String userId, String password) throws TeamRepositoryException {
-
+	public boolean rtcApiLogin(int wiid, String userId, String password) {
+		logger.info("userId : {} password : {} ", userId, password);
 		rtcMGR.setREPOSITORY_ADDRESS(IAttributeIDs.REPOSITORY_ADDRESS);
 		// userid
 		rtcMGR.setUSER(userId);
 		// password
 		rtcMGR.setPASSWORD(password);
 		// RTC Client start
-		// rtcMGR.startup();
+		try {
+			rtcMGR.startup();
+		} catch (TeamRepositoryException e) {
+			logger.error(e.getMessage());
+			rtcMGR.shutdown();
+			return false;
+		}
 
 		IWorkItemClient workitemClient = rtcMGR.getWorkitemClient();
 		IProgressMonitor monitor = (IProgressMonitor) rtcMGR.getMonitor();
 		logger.info("workitemClient : {} " + workitemClient);
-		if (workitemClient == null)
+		if (workitemClient == null) {
+			rtcMGR.shutdown();
 			return false;
+		}
 
 		if (workitemClient != null && monitor != null) {
 			statusAction.setWorkitemClient(workitemClient);
