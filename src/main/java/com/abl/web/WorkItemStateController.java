@@ -38,7 +38,7 @@ public class WorkItemStateController {
 	@Resource
 	private ApprovalStatusAction statusAction;
 
-	@RequestMapping(value = "approval/{wiid}", method = RequestMethod.POST)
+	@RequestMapping(value = "/approval/state/{wiid}", method = RequestMethod.POST)
 	public String approval(Model model, HttpSession session, @PathVariable int wiid) throws TeamRepositoryException {
 		logger.info("approval");
 		//Authenticate authenticate = (Authenticate) session.getAttribute("authenticate");
@@ -67,7 +67,7 @@ public class WorkItemStateController {
 		return "users/approval";
 	}
 
-	@RequestMapping("/login/form")
+	@RequestMapping("/approval")
 	public String loginForm(Model model, String userId, int wiid, String actionId, String oldStateId) {
 		Authenticate authenticate = new Authenticate();
 		authenticate.setUserId(userId);

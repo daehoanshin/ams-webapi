@@ -29,7 +29,7 @@
 				
 				<c:choose>
 				<c:when test="${empty result}">
-					<form:form cssClass="form-horizontal" action="/approval/${authenticate.wiid}" method="post">
+					<form:form cssClass="form-horizontal" action="/approval/state/${authenticate.wiid}" method="post">
 					<button type="submit" class="btn btn-primary">승인처리</button>
 				</form:form>
 				</c:when>
