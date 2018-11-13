@@ -39,7 +39,7 @@ public class WorkItemStateController {
 	private ApprovalStatusAction statusAction;
 
 	@RequestMapping(value = "/approval/state/{wiid}", method = RequestMethod.POST)
-	public String approval(Model model, HttpSession session, @PathVariable int wiid) throws TeamRepositoryException {
+	public String approvalState(Model model, HttpSession session, @PathVariable int wiid) throws TeamRepositoryException {
 		logger.info("approval");
 		//Authenticate authenticate = (Authenticate) session.getAttribute("authenticate");
 		try {
@@ -66,8 +66,35 @@ public class WorkItemStateController {
 		}
 		return "users/approval";
 	}
+	
+	@RequestMapping(value = "/approval", method = RequestMethod.POST)
+	public String approval(Model model, String wiid, String actionId, String oldStateId) throws TeamRepositoryException {
+		logger.info("approval");
+		
+		try {
+			/*String actionId = 
+			String oldStateId = (String) session.getAttribute("oldStateId");*/
+			//String userId = (String) session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+			
+			
+			logger.info("wiid = " + wiid + " actionId = " + actionId + " oldStateId = " + oldStateId);
+			int wiId = Integer.parseInt(wiid);
+			
+			rtcApiLogin("radmin", "ttfuture_01");;
+			boolean result = statusAction.findWorkItem(wiId, actionId , oldStateId);
+			model.addAttribute("result", result);
+			model.addAttribute("wiid", wiid);
+			model.addAttribute("userId", "radmin");
+			
+			
+		} finally {
+			rtcMGR.shutdown();
+		}
+		return "users/result";
+	}
 
-	@RequestMapping("/approval")
+
+	@RequestMapping("/loginForm")
 	public String loginForm(Model model, String userId, int wiid, String actionId, String oldStateId) {
 		Authenticate authenticate = new Authenticate();
 		authenticate.setUserId(userId);
@@ -86,7 +113,7 @@ public class WorkItemStateController {
 			return "users/login";
 		}
 		//rtc 로그인처리
-		if (!rtcApiLogin(authenticate.getWiid(), authenticate.getUserId(), authenticate.getPassword())) {
+		if (!rtcApiLogin(authenticate.getUserId(), authenticate.getPassword())) {
 			model.addAttribute("errorMessage", "비밀번호가 틀립니다.");
 			return "users/login";
 		}
@@ -97,7 +124,7 @@ public class WorkItemStateController {
 		return "users/approval";
 	}
 
-	public boolean rtcApiLogin(int wiid, String userId, String password) {
+	public boolean rtcApiLogin(String userId, String password) {
 		logger.info("userId : {} password : {} ", userId, password);
 		rtcMGR.setREPOSITORY_ADDRESS(IAttributeIDs.REPOSITORY_ADDRESS);
 		// userid

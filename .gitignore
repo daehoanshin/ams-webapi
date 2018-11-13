@@ -6,3 +6,7 @@ webapp/META-INF/
 webapp/WEB-INF/lib/
 
 \.settings/
+
+*.class
+
+target/m2e-wtp/web-resources/META-INF/
