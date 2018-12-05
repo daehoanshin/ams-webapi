@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,7 +38,15 @@ public class WorkItemStateController {
 
 	@Resource
 	private ApprovalStatusAction statusAction;
+	
+	@Value("#{users['rtc.admin.user']}")
+	private String adminUserId;
+	
+	@Value("#{users['rtc.admin.password']}")
+	private String adminUserPassword;
 
+
+	@Deprecated
 	@RequestMapping(value = "/approval/state/{wiid}", method = RequestMethod.POST)
 	public String approvalState(Model model, HttpSession session, @PathVariable int wiid) throws TeamRepositoryException {
 		logger.info("approval");
@@ -72,15 +81,11 @@ public class WorkItemStateController {
 		logger.info("approval");
 		
 		try {
-			/*String actionId = 
-			String oldStateId = (String) session.getAttribute("oldStateId");*/
-			//String userId = (String) session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-			
 			
 			logger.info("wiid = " + wiid + " actionId = " + actionId + " oldStateId = " + oldStateId);
 			int wiId = Integer.parseInt(wiid);
 			
-			rtcApiLogin("radmin", "ttfuture_01");;
+			rtcApiLogin(adminUserId, adminUserPassword);;
 			boolean result = statusAction.findWorkItem(wiId, actionId , oldStateId);
 			model.addAttribute("result", result);
 			model.addAttribute("wiid", wiid);
@@ -97,6 +102,7 @@ public class WorkItemStateController {
 	@RequestMapping("/loginForm")
 	public String loginForm(Model model, String userId, int wiid, String actionId, String oldStateId) {
 		Authenticate authenticate = new Authenticate();
+		logger.info("adminUserId {} , adminUserPassword {} ", adminUserId, adminUserPassword);
 		authenticate.setUserId(userId);
 		authenticate.setWiid(wiid);
 		authenticate.setActionId(actionId);

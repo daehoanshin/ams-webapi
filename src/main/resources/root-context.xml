@@ -29,4 +29,9 @@
 	<!-- <mvc:annotation-driven /> -->
 	<context:annotation-config/>
 	
+	<util:properties id="users">
+        <prop key="rtc.admin.user">radmin</prop>
+        <prop key="rtc.admin.password">ttfuture_01</prop>
+    </util:properties>
+
 </beans>
