@@ -10,3 +10,5 @@ webapp/WEB-INF/lib/
 *.class
 
 target/m2e-wtp/web-resources/META-INF/
+/.classpath
+/.project
